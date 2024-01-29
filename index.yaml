@@ -1,0 +1,14 @@
+apiVersion: v1
+entries:
+  msite-base-chart:
+  - apiVersion: v2
+    appVersion: 1.16.0
+    created: "2024-01-29T17:53:15.1428034+08:00"
+    description: A Helm chart for Kubernetes
+    digest: d9247079388a366712c682067e9d7f1d7e11c11b1fcb77d70d4d9f6746275625
+    name: msite-base-chart
+    type: application
+    urls:
+    - https://rjoeberttan.github.io/msite-base-chart/msite-base-chart-0.1.0.tgz
+    version: 0.1.0
+generated: "2024-01-29T17:53:15.1376834+08:00"
