@@ -3,12 +3,12 @@ entries:
   msite-base-chart:
   - apiVersion: v2
     appVersion: 1.16.0
-    created: "2024-01-29T17:40:18.7565043+08:00"
+    created: "2024-01-29T17:44:23.0263015+08:00"
     description: A Helm chart for Kubernetes
-    digest: 447e9a02467f7014f3daa39fbbd89df5d68b6c5cb75da993970f419caab3a808
+    digest: 3cf2d203a9a689712c765f81cc3b1c12b49af1d60a4583ffeb2ce59889e0b45d
     name: msite-base-chart
     type: application
     urls:
     - https://github.com/rjoeberttan/test-kubernetes-manifest/msite-base-chart-0.1.0.tgz
     version: 0.1.0
-generated: "2024-01-29T17:40:18.7505315+08:00"
+generated: "2024-01-29T17:44:23.0253185+08:00"
