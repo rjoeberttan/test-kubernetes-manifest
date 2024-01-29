@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include ".Values.applicationName" . }}
+  labels:
+    {{- include "msite-base-chart.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    {{- toYaml .Values.servicePorts | nindent 4 }}
+  selector:
+    {{- include "msite-base-chart.selectorLabels" . | nindent 8 }}

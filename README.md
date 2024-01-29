@@ -1,1 +1,0 @@
-# test-kubernetes-manifest

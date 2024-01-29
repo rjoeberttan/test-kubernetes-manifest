@@ -1,0 +1,67 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.applicationName }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  
+  selector:
+    {{- with .Values.labels }}
+    matchLabels:
+    {{- toYaml . | nindent 8 }}
+    {{- end }}
+
+  {{- if .Values.applyDeploymentStrategy.enabled }}
+  {{- with .Values.strategy }}
+  strategy:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- end }}
+
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.labels }}
+      labels:
+      {{- toYaml . | nindent 8 }}
+      {{- end }} 
+    spec:
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+           
+      containers:
+        - name: {{ .Values.applicationName }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            {{- toYaml .Values.servicePorts | nindent 12 }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          env:
+            {{- toYaml .Values.envVars | nindent 12 }}
+          {{- if .Values.applyVolumes }}
+          volumeMounts: 
+            {{- toYaml .Values.volumeMounts | nindent 12 }}
+          {{- end}}
+      {{- if .Values.applyVolumes }}
+      volumes:
+        {{- toYaml .Values.volumes | nindent 8 }}
+      {{- end}}
+
