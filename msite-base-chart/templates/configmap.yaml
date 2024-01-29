@@ -1,6 +1,0 @@
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: {{ .Values.applicationName }}-settings
-data:
-  {{ .Values.configFileName }}: {{ .Values.config | toYaml | nindent 2 }}
