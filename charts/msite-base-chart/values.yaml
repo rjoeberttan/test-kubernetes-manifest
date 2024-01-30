@@ -27,15 +27,15 @@ securityContext: {}
   # runAsUser: 1000
 
 
-applicationName: m88-player-portal-custom-components
-namespace: production
+applicationName: player-portal-custom-components
+namespace: msite-base-chart
 labels: {
   "app.s3dv.io.name": "m88-player-portal-custom-components-homepage"
 }
 replicaCount: 2
 
 image:
-  repository: acrmsiteprdea.azurecr.io/msite-player-portal-configuration-service/master
+  repository: yauritux/busybox-curl
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
   tag: "26"
@@ -43,6 +43,18 @@ image:
 imagePullSecrets: [{"name": "acr-secret"}]
 
 servicePorts: [{
+    "port": 3003,
+    "name": "http",
+    "protocol": TCP,
+    "targetPort": 3003,
+  },{
+    "containerPort": 443,
+    "name": "https",
+    "protocol": TCP,
+    "targetPort": 443,
+  }]
+
+containerPorts: [{
     "containerPort": 3003,
     "name": "http",
     "protocol": TCP
