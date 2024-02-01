@@ -3,9 +3,9 @@ entries:
   msite-base-chart:
   - apiVersion: v2
     appVersion: 1.16.0
-    created: "2024-02-01T15:56:47.6846135+08:00"
+    created: "2024-02-01T16:01:07.8907531+08:00"
     description: A Helm chart for Kubernetes
-    digest: 48add3b6c1b27834f67bb4d13e7e52c9e9878e53961988f3ceb5b64b4dda9e9b
+    digest: d480ceef3f2a03db021b957528b23ff3c412d4f4969c871517c913bee74cc6b7
     name: msite-base-chart
     type: application
     urls:
@@ -13,7 +13,7 @@ entries:
     version: 0.5.0
   - apiVersion: v2
     appVersion: 1.16.0
-    created: "2024-02-01T15:56:47.6816986+08:00"
+    created: "2024-02-01T16:01:07.8898058+08:00"
     description: A Helm chart for Kubernetes
     digest: ee5c8d7f7cd8332a19fa81ead3d903a64b3fc73815b2becdc8930be798fc03bb
     name: msite-base-chart
@@ -23,7 +23,7 @@ entries:
     version: 0.4.0
   - apiVersion: v2
     appVersion: 1.16.0
-    created: "2024-02-01T15:56:47.6807147+08:00"
+    created: "2024-02-01T16:01:07.8888105+08:00"
     description: A Helm chart for Kubernetes
     digest: 90abb543c4baabd2d3ded730642ad037074388f83e9cf8f67662f69f93f070ad
     name: msite-base-chart
@@ -33,7 +33,7 @@ entries:
     version: 0.3.0
   - apiVersion: v2
     appVersion: 1.16.0
-    created: "2024-02-01T15:56:47.6797178+08:00"
+    created: "2024-02-01T16:01:07.8867949+08:00"
     description: A Helm chart for Kubernetes
     digest: b5201ff01619d3215fa2917ed82966aab65934e479fc1acde36a4024d0255749
     name: msite-base-chart
@@ -43,7 +43,7 @@ entries:
     version: 0.2.0
   - apiVersion: v2
     appVersion: 1.16.0
-    created: "2024-02-01T15:56:47.6786974+08:00"
+    created: "2024-02-01T16:01:07.8858033+08:00"
     description: A Helm chart for Kubernetes
     digest: 691fdcda73457bfccb4333eee1d6c3ea786efdc095a2e0b2bf5838a4ccc6be73
     name: msite-base-chart
@@ -51,4 +51,4 @@ entries:
     urls:
     - https://rjoeberttan.github.io/test-kubernetes-manifest/msite-base-chart-0.1.0.tgz
     version: 0.1.0
-generated: "2024-02-01T15:56:47.6777138+08:00"
+generated: "2024-02-01T16:01:07.8847964+08:00"

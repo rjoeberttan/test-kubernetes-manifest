@@ -219,6 +219,8 @@ nodeSelector: {}
 # ================================================================
 # Configmap Values
 # ================================================================
+configmap: 
+  enabled: true
 configFileName: appsettings.json
 config: |
   {"name": "tests"}
@@ -227,6 +229,8 @@ config: |
 # ================================================================
 # Secret Values
 # ================================================================
+secret: 
+  enabled: true
 secretStringName: appsettings.json
 secret: |
   {
