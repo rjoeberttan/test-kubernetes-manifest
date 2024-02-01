@@ -1,6 +1,9 @@
 # Default values for msite-base-chart.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
+# =================================================================
+# Helm Generated Keys in values
+# =================================================================
 nameOverride: ""
 fullnameOverride: ""
 
@@ -26,12 +29,19 @@ securityContext: {}
   # runAsNonRoot: true
   # runAsUser: 1000
 
-
+# ================================================================
+# Deployment Values
+# ================================================================
+# applicationName is being used as general naming for all Kubernetes Objects to be created
 applicationName: player-portal-custom-components
 namespace: msite-base-chart
+
+# labels is being used for all labels in deployment, container, and being used as a selector in the service
 labels: {
   "app.s3dv.io.name": "m88-player-portal-custom-components-homepage"
 }
+
+# Replica count in deployment 
 replicaCount: 2
 
 image:
@@ -42,18 +52,7 @@ image:
 
 imagePullSecrets: [{"name": "acr-secret"}]
 
-servicePorts: [{
-    "port": 3003,
-    "name": "http",
-    "protocol": TCP,
-    "targetPort": 3003,
-  },{
-    "containerPort": 443,
-    "name": "https",
-    "protocol": TCP,
-    "targetPort": 443,
-  }]
-
+# While these will be the ports to be exposed in the deployment/container
 containerPorts: [{
     "containerPort": 3003,
     "name": "http",
@@ -64,10 +63,106 @@ containerPorts: [{
     "protocol": TCP 
   }]
 
-envVars: [{"NEW_RELIC_API_KEY": "DOTNET_ENVIRONMENT", "value": "NRAK-95F7020N5N6374H377V9IPTCEHO"}]
+# Environment variable in the deployment/container
+envVars: [{"name": "NEW_RELIC_API_KEY", "value": "NRAK-95F7020N5N6374H377V9IPTCEHO"}]
+
+applyStartupProbe: true
+startupProbe: {
+  "httpGet": {
+    "path": "/api/health",
+    "port": 8080
+  },
+  "failureThreshold": 30,
+  "periodSeconds": 10
+}
+
+
+applyReadinessProbe: true
+readinessProbe: {
+  "failureThreshold": 5, 
+  "httpGet": {
+    "path": "/api/health",
+    "port": "8080"
+  },
+  "initialDelaySeconds": 120,
+  "periodSeconds": 10,
+  "successThreshold": 1,
+  "timeoutSeconds": 60
+}
+
+applyLivelinessProbe: true
+livelinessProbe: {
+  "failureThreshold": 5, 
+  "httpGet": {
+    "path": "/api/health",
+    "port": "8080"
+  },
+  "initialDelaySeconds": 120,
+  "periodSeconds": 10,
+  "successThreshold": 1,
+  "timeoutSeconds": 60,
+  "terminationGracePeriodSeconds": 60
+}
+
+# Resources used for deployment/container
+resources: {
+  "requests": {"memory": "300Mi", "cpu": "100m"} , "limits": {"memory": "600Mi", "cpu": "300m"} 
+}
+
+# Tolerations used for deployment/container
+tolerations: [
+  {
+    "key": "worker", "operator": "Equal", "value": "md-88", "effect": "NoSchedule"
+  }
+]
+
+affinity: {
+  "nodeAffinity": 
+    {"requiredDuringSchedulingIgnoredDuringExecution":
+      {"nodeSelectorTerms": 
+        [
+          {
+            "matchExpressions": 
+            [
+              {"key": "nodepool", "operator": "In", "values": [ "mdm88pool01" ]}
+            ]
+          }        
+        ]
+      }
+    }
+}
+
+applyVolumes: false
+volumeMounts: [{"name": "config-appsettings-secret", "mountPath": "/app/appsettings.json", "subPath": "appsettings.json"}]
+volumes: [{ "name": "config-appsettings-secret", "secret": {"secretName": "msite-player-portal-configuration-service-secret" }}]
+
+applyDeploymentStrategy: 
+  enabled: true
+strategy: {"rollingUpdate": {"maxSurge": 1, "maxUnavailable": 1}, "type": "RollingUpdate"}
 
 
 
+# ================================================================
+# Service Values
+# ================================================================
+# This is the entries which will be populated in the service object
+servicePorts: [{
+    "port": 3003,
+    "name": "http",
+    "protocol": TCP,
+    "targetPort": 3003,
+  },{
+    "port": 443,
+    "name": "https",
+    "protocol": TCP,
+    "targetPort": 443,
+  }]
+
+
+
+# ================================================================
+# Ingress Values
+# ================================================================
 ingress:
   enabled: true
   className: ""
@@ -102,17 +197,10 @@ ingress:
 service:
   port: 3003
 
-  # We usually recommend not to specify default resources and to leave this as a conscious
-  # choice for the user. This also increases chances charts run on environments with little
-  # resources, such as Minikube. If you do want to specify resources, uncomment the following
-  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
-  # limits:
-  #   cpu: 100m
-  #   memory: 128Mi
-  # requests:
-  #   cpu: 100m
-  #   memory: 128Mi
 
+# ================================================================
+# HPA Values
+# ================================================================
 autoscaling:
   enabled: true
   minReplicas: 2
@@ -137,41 +225,9 @@ scaleUp: {
 nodeSelector: {}
 
 
-resources: {
-  "requests": {"memory": "300Mi", "cpu": "100m"} , "limits": {"memory": "600Mi", "cpu": "300m"} 
-}
-
-tolerations: [
-  {
-    "key": "worker", "operator": "Equal", "value": "md-88", "effect": "NoSchedule"
-  }
-]
-
-affinity: {
-  "nodeAffinity": 
-    {"requiredDuringSchedulingIgnoredDuringExecution":
-      {"nodeSelectorTerms": 
-        [
-          {
-            "matchExpressions": 
-            [
-              {"key": "nodepool", "operator": "In", "values": [ "mdm88pool01" ]}
-            ]
-          }        
-        ]
-      }
-    }
-}
-
-applyVolumes: false
-volumeMounts: [{"name": "config-appsettings-secret", "mountPath": "/app/appsettings.json", "subPath": "appsettings.json"}]
-volumes: [{ "name": "config-appsettings-secret", "secret": {"secretName": "msite-player-portal-configuration-service-secret" }}]
-
-applyDeploymentStrategy: 
-  enabled: true
-strategy: {"rollingUpdate": {"maxSurge": 1, "maxUnavailable": 1}, "type": "RollingUpdate"}
-
-
+# ================================================================
+# Configmap Values
+# ================================================================
 configFileName: appsettings.json
 config: |
   {

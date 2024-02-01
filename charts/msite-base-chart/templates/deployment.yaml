@@ -60,6 +60,24 @@ spec:
           volumeMounts: 
             {{- toYaml .Values.volumeMounts | nindent 12 }}
           {{- end}}
+
+          {{- if .Values.applyStartupProbe }}
+          startupProbe:
+            {{- toYaml .Values.startupProbe | nindent 12 }}
+          {{- end}}
+
+          {{- if .Values.applyReadinessProbe }}
+          readinessProbe:
+            {{- toYaml .Values.readinessProbe | nindent 12 }}
+          {{- end}}
+
+          {{- if .Values.applyLivelinessProbe }}
+          livelinesssProbe:
+            {{- toYaml .Values.livelinessProbe | nindent 12 }}
+          {{- end}}
+
+
+
       {{- if .Values.applyVolumes }}
       volumes:
         {{- toYaml .Values.volumes | nindent 8 }}
