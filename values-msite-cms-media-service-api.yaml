@@ -33,28 +33,28 @@ securityContext: {}
 # Deployment Values
 # ================================================================
 # applicationName is being used as general naming for all Kubernetes Objects to be created
-applicationName: player-portal-custom-components
-namespace: msite-base-chart
+applicationName: msite-cms-media-service-api
+namespace: msite-devtron-stg
 
 # labels is being used for all labels in deployment, container, and being used as a selector in the service
 labels: {
-  "app.s3dv.io.name": "m88-player-portal-custom-components-homepage"
+  "app.s3dv.io.name": "msite-cms-media-service-api"
 }
 
 # Replica count in deployment 
-replicaCount: 2
+replicaCount: 1
 
 image:
-  repository: yauritux/busybox-curl
+  repository: testacrmsitestgea.azurecr.io/devtron/msite-cms-media-service-api
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: "26"
+  tag: "latest"
 
 imagePullSecrets: [{"name": "acr-secret"}]
 
 # While these will be the ports to be exposed in the deployment/container
 containerPorts: [{
-    "containerPort": 3003,
+    "containerPort": 8080,
     "name": "http",
     "protocol": TCP
   },{
@@ -64,7 +64,7 @@ containerPorts: [{
   }]
 
 # Environment variable in the deployment/container
-envVars: [{"name": "NEW_RELIC_API_KEY", "value": "NRAK-95F7020N5N6374H377V9IPTCEHO"}]
+envVars: [{"name": "ASPNETCORE_ENVIRONMENT", "value": "Development"}, {"name": "ASPNETCORE_URLS", "value": "http://*:8080"}, {"name": "NEW_RELIC_LICENSE_KEY", "value": "429e116a74708dffa2e85b98b23ad286FFFFNRAL"}]
 
 applyStartupProbe: true
 startupProbe: {
@@ -106,13 +106,13 @@ livelinessProbe: {
 
 # Resources used for deployment/container
 resources: {
-  "requests": {"memory": "300Mi", "cpu": "100m"} , "limits": {"memory": "600Mi", "cpu": "300m"} 
+  "requests": {"memory": "300Mi", "cpu": "100m"} , "limits": {"memory": "300Mi", "cpu": "100m"} 
 }
 
 # Tolerations used for deployment/container
 tolerations: [
   {
-    "key": "worker", "operator": "Equal", "value": "md-88", "effect": "NoSchedule"
+    "key": "worker", "operator": "Equal", "value": "md-cms", "effect": "NoSchedule"
   }
 ]
 
@@ -124,7 +124,7 @@ affinity: {
           {
             "matchExpressions": 
             [
-              {"key": "nodepool", "operator": "In", "values": [ "mdm88pool01" ]}
+              {"key": "nodepool", "operator": "In", "values": [ "md-cms" ]}
             ]
           }        
         ]
@@ -133,8 +133,8 @@ affinity: {
 }
 
 applyVolumes: false
-volumeMounts: [{"name": "config-appsettings-secret", "mountPath": "/app/appsettings.json", "subPath": "appsettings.json"}]
-volumes: [{ "name": "config-appsettings-secret", "secret": {"secretName": "msite-player-portal-configuration-service-secret" }}]
+volumeMounts: [{"name": "config-appsettings-secret", "mountPath": "/app/appsettings.json", "subPath": "appsettings.json"}, {"name": "config-appsettings-secret", "mountPath": "/app/appsettings.Development.json", "subPath": "appsettings.json"}]
+volumes: [{ "name": "config-appsettings-secret", "secret": {"secretName": "msite-cms-media-service-api-secret" }}]
 
 applyDeploymentStrategy: 
   enabled: true
@@ -147,10 +147,10 @@ strategy: {"rollingUpdate": {"maxSurge": 1, "maxUnavailable": 1}, "type": "Rolli
 # ================================================================
 # This is the entries which will be populated in the service object
 servicePorts: [{
-    "port": 3003,
+    "port": 8080,
     "name": "http",
     "protocol": TCP,
-    "targetPort": 3003,
+    "targetPort": 8080,
   },{
     "port": 443,
     "name": "https",
@@ -169,24 +169,36 @@ ingress:
   annotations: {
     "kubernetes.io/ingress.class": "nginx",
     "nginx.ingress.kubernetes.io/use-regex": "true",
-    "nginx.ingress.kubernetes.io/proxy-cookie-path": "/ \"/; Secure;\""
-    }
+    "nginx.ingress.kubernetes.io/enable-cors": 'true',
+    "nginx.ingress.kubernetes.io/cors-allow-headers": "AccessToken, Content-Type, Authorization",
+    "nginx.ingress.kubernetes.io/proxy-cookie-path": "/ \"/; Secure;\"",
+    "nginx.ingress.kubernetes.io/proxy-body-size": "300m",
+  }
   hosts:
-    - host: 
+    - host: api-mediaservice.msitestg.com-test
       paths:
         - path: /
           pathType: Prefix
           backend:
               service:
-                name: 
+                name: msite-cms-media-service-api
                 port:
-                  number: 
+                  number: 8080
+    - host: api-mediaservice.msitestg.internal-test
+      paths:
+        - path: /asd
+          pathType: Prefix
+          backend:
+              service:
+                name: msite-cms-media-service-api
+                port:
+                  number: 8080
   tls: []
   #  - secretName: chart-example-tls
   #    hosts:
   #      - chart-example.local
 service:
-  port: 3003
+  port: 8080
 
 
 # ================================================================
@@ -221,97 +233,89 @@ nodeSelector: {}
 # ================================================================
 configFileName: appsettings.json
 config: |
-  {"name": "tests"}
-
-
-# ================================================================
-# Secret Values
-# ================================================================
-secretStringName: appsettings.json
-secret: |
   {
-    "ConnectionStrings": {
-      "MediaDb": "Data Source=172.18.122.8\\MSITESTGAG_01,1433; Initial Catalog=msite-media; User ID=msite.user;Password=GPu3WxAytqCJH_qr;Max Pool Size=2000;Min Pool size=5;Pooling=true;Connection Timeout=6000;"
-    },
-    "AzureStorage": {
-      "ConnectionString": "DefaultEndpointsProtocol=https;AccountName=samsitestgea;AccountKey=n6VWg+2tnu6IFdhqQw9mxwTlglN45SiXmVM7FaAHGcrTlEQsYjbZELRbRqpNk3do2/bCo2oXvuqu+AStG/ym8g==;EndpointSuffix=core.windows.net",
-      "Container": "msitestg",
-      "EndPointUrl": "https://samsitestgea.blob.core.windows.net/msitestg"
-    },
-    "FrontEndUrl": "https://msphere.msitestg.com",
-    "Logging": {
-      "LogLevel": {
-        "Default": "Debug",
-        "Microsoft": "Debug",
-        "Microsoft.Hosting.Lifetime": "Debug"
-      }
-    },
-    "AllowedHosts": "*",
-    "Redis": {
-      "Password": "z6aCFlZqv83xp8oaE614iUuS88uFNyKXwAzCaAZauhk=",
-      "AllowAdmin": false,
-      "Ssl": true,
-      "ConnectTimeout": 10000,
-      "ConnectRetry": 2,
-      "Hosts": [
-        {
-          "Host": "REDIS-MSITE-STG-EA.redis.cache.windows.net",
-          "Port": "6380"
-        }
-      ],
-      "Database": 0
-    },
-    "AutoSaveToRedis": true,
-    "NLog": {
-      "autoReload": true,
-      "throwConfigExceptions": false,
-      "internalLogLevel": "Off",
-      "internalLogFile": "c:\\temp\\internal-nlog.txt",
-      "extensions": {
-        "NLog.Web.AspNetCore": {
-          "assembly": "NLog.Web.AspNetCore"
-        },
-        "NLog.Web.AspNetCore.Targets.Gelf": {
-          "assembly": "NLog.Web.AspNetCore.Targets.Gelf"
+      "ConnectionStrings": {
+        "MediaDb": "Data Source=172.18.122.8\\MSITESTGAG_01,1433; Initial Catalog=msite-media; User ID=msite.user;Password=GPu3WxAytqCJH_qr;Max Pool Size=2000;Min Pool size=5;Pooling=true;Connection Timeout=6000;"
+      },
+      "AzureStorage": {
+        "ConnectionString": "DefaultEndpointsProtocol=https;AccountName=samsitestgea;AccountKey=n6VWg+2tnu6IFdhqQw9mxwTlglN45SiXmVM7FaAHGcrTlEQsYjbZELRbRqpNk3do2/bCo2oXvuqu+AStG/ym8g==;EndpointSuffix=core.windows.net",
+        "Container": "msitestg",
+        "EndPointUrl": "https://samsitestgea.blob.core.windows.net/msitestg"
+      },
+      "FrontEndUrl": "https://msphere.msitestg.com",
+      "Logging": {
+        "LogLevel": {
+          "Default": "Debug",
+          "Microsoft": "Debug",
+          "Microsoft.Hosting.Lifetime": "Debug"
         }
       },
-      "variables": {
-        "var_logdir": "c:/temp"
+      "AllowedHosts": "*",
+      "Redis": {
+        "Password": "z6aCFlZqv83xp8oaE614iUuS88uFNyKXwAzCaAZauhk=",
+        "AllowAdmin": false,
+        "Ssl": true,
+        "ConnectTimeout": 10000,
+        "ConnectRetry": 2,
+        "Hosts": [
+          {
+            "Host": "REDIS-MSITE-STG-EA.redis.cache.windows.net",
+            "Port": "6380"
+          }
+        ],
+        "Database": 0
       },
-      "default-wrapper": {
-        "type": "AsyncWrapper",
-        "overflowAction": "Block"
-      },
-      "targets": {
-        "gelfudp": {
-          "type": "Gelf",
-          "facility": "msite-udp-12201-staging",
-          "endpoint": "udp://172.18.102.5:12201",
-          "layout": "${message}",
-          "SendLastFormatParameter": true,
-          "parameter": {
-            "Name": "thread",
-            "Layout": "${threadid}"
+      "AutoSaveToRedis": true,
+      "NLog": {
+        "autoReload": true,
+        "throwConfigExceptions": false,
+        "internalLogLevel": "Off",
+        "internalLogFile": "c:\\temp\\internal-nlog.txt",
+        "extensions": {
+          "NLog.Web.AspNetCore": {
+            "assembly": "NLog.Web.AspNetCore"
+          },
+          "NLog.Web.AspNetCore.Targets.Gelf": {
+            "assembly": "NLog.Web.AspNetCore.Targets.Gelf"
           }
         },
-        "swfile": {
-          "type": "File",
-          "filename": "C:\\Logs\\${shortdate}\\${level}.txt",
-          "layout": "${longdate}|${level:upperCase=true}|${logger}|${aspnet-Request-Method}|url: ${aspnet-Request-Url}${aspnet-Request-QueryString}|${message}|${event-properties:item=Parameter}",
-          "concurrentwrites": "true"
-        }
-      },
-      "rules": [
-        {
-          "logger": "*",
-          "minLevel": "Debug",
-          "writeTo": "GelfUdp"
+        "variables": {
+          "var_logdir": "c:/temp"
         },
-        {
-          "logger": "*",
-          "minLevel": "Debug",
-          "writeTo": "swFile"
-        }
-      ]
+        "default-wrapper": {
+          "type": "AsyncWrapper",
+          "overflowAction": "Block"
+        },
+        "targets": {
+          "gelfudp": {
+            "type": "Gelf",
+            "facility": "msite-udp-12201-staging",
+            "endpoint": "udp://172.18.102.5:12201",
+            "layout": "${message}",
+            "SendLastFormatParameter": true,
+            "parameter": {
+              "Name": "thread",
+              "Layout": "${threadid}"
+            }
+          },
+          "swfile": {
+            "type": "File",
+            "filename": "C:\\Logs\\${shortdate}\\${level}.txt",
+            "layout": "${longdate}|${level:upperCase=true}|${logger}|${aspnet-Request-Method}|url: ${aspnet-Request-Url}${aspnet-Request-QueryString}|${message}|${event-properties:item=Parameter}",
+            "concurrentwrites": "true"
+          }
+        },
+        "rules": [
+          {
+            "logger": "*",
+            "minLevel": "Debug",
+            "writeTo": "GelfUdp"
+          },
+          {
+            "logger": "*",
+            "minLevel": "Debug",
+            "writeTo": "swFile"
+          }
+        ]
+      }
     }
-  }

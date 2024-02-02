@@ -232,7 +232,7 @@ config: |
 secret: 
   enabled: true
 secretStringName: appsettings.json
-secret: |
+secretContent: |
   {
     "ConnectionStrings": {
       "MediaDb": "Data Source=172.18.122.8\\MSITESTGAG_01,1433; Initial Catalog=msite-media; User ID=msite.user;Password=GPu3WxAytqCJH_qr;Max Pool Size=2000;Min Pool size=5;Pooling=true;Connection Timeout=6000;"
